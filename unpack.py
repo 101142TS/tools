@@ -7,8 +7,16 @@ import hashlib
 import shutil
 import time
 import datetime
-
+def getTID():
+    global tidpath
+    os.system('rm ./tid.txt 2>/dev/null')
+    os.system('adb pull %s ./tid.txt 2>/dev/null' % tidpath)
+    fp = open('./tid.txt', 'r')
+    tid = fp.readline();
+    fp.close()
+    return tid
 def main():
+    global tidpath
     #变成root模式
     os.system('adb root')
     time.sleep(2)
@@ -80,23 +88,22 @@ def main():
         else:
             time.sleep(WaitingTime)
 
-        #读取tid
-        os.system('rm ./tid.txt 2>/dev/null')
-        os.system('adb pull %s ./tid.txt 2>/dev/null' % tidpath)
-        if not os.path.exists('./tid.txt'):
-            print("诡异中断")
-            continue;
-        if os.path.getsize('./tid.txt') == 0:
-            print("诡异中断")
-            continue;
-        fp = open('./tid.txt', 'r')
-        tid = fp.readline();       tid = int(tid)
-        print("线程号 %d " % tid)
-        fp.close()
+        #这里的lastTID可能是空的
+        lastTID = getTID();
 
         #判断
-        cnt = 0
+        #cnt = 0
         while 1:
+            #等待10s
+            time.sleep(10)
+            nowTID = getTID();
+            print(nowTID)
+            if nowTID != lastTID:
+                lastTID = nowTID
+                continue;
+            else:
+                break;
+            '''
             #查看线程tid是否存活
             os.system('rm ./tmp.txt 2>/dev/null')
             os.system('adb shell ps -t | awk \'{print $2}\' > ./tmp.txt')
@@ -106,8 +113,7 @@ def main():
             x = fp.readline()  #读取第一行PID
             x = fp.readline()
             while x:
-                x = int(x)
-                if x == tid:
+                if x == nowTID:
                     alive = 1;
                     break;
                 x = fp.readline()
@@ -115,16 +121,16 @@ def main():
 
             if alive == 0:
                 break;
-            time.sleep(0.2)
-            cnt = cnt + 1
+                time.sleep(0.2)
+                cnt = cnt + 1
             
             #容忍4s，不行就退出
             if cnt == 20:
                 break;
-
+            '''
         print("准备停止")
         os.system('adb shell am force-stop %s' % packagename)
-        time.sleep(1)
+        
 
     print("dump已完成，准备取出101142ts文件夹")
     #将后台的记录日志关掉
