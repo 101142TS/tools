@@ -7,18 +7,46 @@ import hashlib
 import shutil
 import time
 import datetime
+
+#输入ID，返回设备名
+def trans_ID(ID):
+    fp = open('/home/b/Desktop/tools/dev.txt', 'r')
+    
+    cnt = 0;
+    name = fp.readline();   
+    while name:
+        name = name.strip()
+        if cnt == ID:
+            break;
+        
+        cnt = cnt + 1;
+        name = fp.readline()    
+
+    fp.close()
+    return name
+
 def getTID():
     global tidpath
+    global phoneID
+
     os.system('rm ./tid.txt 2>/dev/null')
-    os.system('adb pull %s ./tid.txt 2>/dev/null' % tidpath)
+    os.system('adb -s %s pull %s ./tid.txt 2>/dev/null' % (phoneID, tidpath))
     fp = open('./tid.txt', 'r')
     tid = fp.readline();
     fp.close()
     return tid
 def main():
     global tidpath
+    global phoneID
+
+    if len(sys.argv) != 2:
+        print("未输入手机的ID")
+        return; 
+
+    phoneID = trans_ID(int(sys.argv[1]))
+
     #变成root模式
-    os.system('adb root')
+    os.system('adb -s %s root' % phoneID)
     time.sleep(2)
     
     #删除该删的东西
@@ -26,11 +54,11 @@ def main():
 
     #删除adblogcat, 新开启logcat并把信息储存到本地
     os.system('rm adblogcat.txt 2>/dev/null')
-    os.system('adb logcat | grep "101142ts" > adblogcat.txt &')
+    os.system('adb -s %s logcat | grep "101142ts" > adblogcat.txt &' % phoneID)
     
     #读取unpack.txt
     os.system('rm ./unpack.txt 2>/dev/null')
-    os.system('adb pull /data/local/tmp/unpack.txt ./unpack.txt')
+    os.system('adb -s %s pull /data/local/tmp/unpack.txt ./unpack.txt' % phoneID)
     fp = open('./unpack.txt', 'r')
     packagename = fp.readline(); packagename = packagename.strip()
     fp.readline();
@@ -42,7 +70,7 @@ def main():
     tidpath = dir + "/tid.txt"
 
     sum = 0
-    os.system('adb shell am force-stop %s' % packagename)
+    os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
     while 1:
         #输出次数
         sum = sum + 1
@@ -52,13 +80,13 @@ def main():
         #判断是否已经结束dump
         okpath = dir + "/OK.txt"
         os.system('rm ./OK.txt 2>/dev/null')
-        os.system('adb pull %s ./OK.txt 2>/dev/null' % okpath)
+        os.system('adb -s %s pull %s ./OK.txt 2>/dev/null' % (phoneID, okpath))
         if os.path.exists("./OK.txt"):
             break
 
         #看app中的sche.txt是否有足够的内容,如果有，更新文件夹下的last_sche，如果没有，使用last_sche.txt更新app中的sche.txt
         os.system('rm ./now_sche.txt 2>/dev/null')
-        os.system('adb pull %s ./now_sche.txt 2>/dev/null' % sche)
+        os.system('adb -s %s pull %s ./now_sche.txt 2>/dev/null' % (phoneID, sche))
 
         output = os.popen('./check')
         num = output.read();
@@ -67,12 +95,12 @@ def main():
         if num == 3:
             os.system('mv now_sche.txt last_sche.txt')
         else:
-            os.system('adb push ./last_sche.txt %s' % sche)
+            os.system('adb -s %s push ./last_sche.txt %s' % (phoneID, sche))
 
-        os.system('adb shell cat %s' % sche)
+        os.system('adb -s %s shell cat %s' % (phoneID, sche))
         print()
         #让应用运行并且等待
-        os.system('adb shell monkey -p %s -c android.intent.category.LAUNCHER 1 > /dev/null' % packagename)
+        os.system('adb -s %s shell monkey -p %s -c android.intent.category.LAUNCHER 1 > /dev/null' % (phoneID, packagename))
         print("应用已启动")
 
         #等待一段时间
@@ -81,7 +109,7 @@ def main():
             while 1:
                 makeuppath = dir + "/makeup"
                 os.system('rm ./makeup 2>/dev/null')
-                os.system('adb pull %s ./makeup 2>/dev/null' % makeuppath)
+                os.system('adb -s %s pull %s ./makeup 2>/dev/null' % (phoneID, makeuppath))
                 if os.path.exists("./makeup"):
                     break
                 time.sleep(5)
@@ -129,7 +157,7 @@ def main():
                 break;
             '''
         print("准备停止")
-        os.system('adb shell am force-stop %s' % packagename)
+        os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
         
 
     print("dump已完成，准备取出101142ts文件夹")
@@ -145,7 +173,7 @@ def main():
     fp.close()
 
     #取出101142ts
-    os.system('adb pull %s ./101142ts 2>/dev/null' % dir)
+    os.system('adb -s %s pull %s ./101142ts 2>/dev/null' % (phoneID, dir))
 
     
 if __name__=="__main__": main()

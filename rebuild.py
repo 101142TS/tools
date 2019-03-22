@@ -6,17 +6,41 @@ import os,sys
 import hashlib
 import shutil
 import time
+
+#输入ID，返回设备名
+def trans_ID(ID):
+    fp = open('/home/b/Desktop/tools/dev.txt', 'r')
+    
+    cnt = 0;
+    name = fp.readline();   
+    while name:
+        name = name.strip()
+        if cnt == ID:
+            break;
+        
+        cnt = cnt + 1;
+        name = fp.readline()    
+
+    fp.close()
+    return name
+
 def main():
+    if len(sys.argv) != 2:
+        print("未输入手机的ID")
+        return; 
+
+    phoneID = trans_ID(int(sys.argv[1]))
+    
     #变成root模式
-    os.system('adb root')
+    os.system('adb -s %s root' % phoneID)
     time.sleep(2)
 
     #删除rebuildlog, 新开启logcat并把信息储存到本地
     os.system('rm rebuildlog.txt')
-    os.system('adb logcat | grep "101142ts" > rebuildlog.txt &')
+    os.system('adb -s %s logcat | grep "101142ts" > rebuildlog.txt &' % phoneID)
 
     #读取unpack.txt
-    os.system('adb pull /data/local/tmp/unpack.txt ./unpack.txt')
+    os.system('adb -s %s pull /data/local/tmp/unpack.txt ./unpack.txt' % phoneID)
     fp = open('./unpack.txt', 'r')
     packagename = fp.readline(); packagename = packagename.strip()
     fp.readline();
@@ -36,18 +60,18 @@ def main():
     tidpath = dir + "/tid.txt"
 
     sum = 0
-    os.system('adb shell am force-stop %s' % packagename)
+    os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
     while 1:
         #输出次数
         sum = sum + 1
         print("第%d次dump " % sum)
 
         #让应用运行并且等待
-        os.system('adb shell monkey -p %s -c android.intent.category.LAUNCHER 1 > /dev/null' % packagename)
+        os.system('adb -s %s shell monkey -p %s -c android.intent.category.LAUNCHER 1 > /dev/null' % (phoneID, packagename))
         time.sleep(WaitingTime)
 
         #读取tid
-        os.system('adb pull %s ./tid.txt' % tidpath)
+        os.system('adb -s %s pull %s ./tid.txt' % (phoneID, tidpath))
         fp = open('./tid.txt', 'r')
         tid = fp.readline();       tid = int(tid)
         print("线程号 %d " % tid)
@@ -55,7 +79,7 @@ def main():
         
         #查看线程tid是否存活，并一直等待直到这个线程死亡
         while 1:
-            os.system('adb shell ps -t | awk \'{print $2}\' > tmp.txt')
+            os.system('adb -s %s shell ps -t | awk \'{print $2}\' > tmp.txt' % phoneID)
 
             alive = 0;
             fp = open('./tmp.txt', 'r')
@@ -74,7 +98,7 @@ def main():
             time.sleep(1)
         
         #强制杀死应用
-        os.system('adb shell am force-stop %s' % packagename)
+        os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
 
         #看是否dump完
         alldone = 1
@@ -86,7 +110,7 @@ def main():
         os.system('rm -rf %s' % dexDIR)
         os.system('mkdir %s' % dexDIR)
         PhonedexDIR = dir + "/dex"
-        os.system('adb pull %s %s 2>null' % (PhonedexDIR, dexDIR))
+        os.system('adb -s %s pull %s %s 2>null' % (phoneID, PhonedexDIR, dexDIR))
         for num in os.listdir(dexDIR): 
             nowDir = os.path.join(dexDIR, num) 
 
@@ -111,7 +135,7 @@ def main():
     
     if Mode == 0:
         nowdir = dir + "/code"
-        os.system('adb pull %s ./jr/code 2>null' % nowdir)
+        os.system('adb -s %s pull %s ./jr/code 2>null' % (phoneID, nowdir))
 
         
 if __name__=="__main__": main()
