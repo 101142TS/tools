@@ -37,7 +37,7 @@ def main():
 
     #删除rebuildlog, 新开启logcat并把信息储存到本地
     os.system('rm rebuildlog.txt')
-    os.system('adb -s %s logcat | grep "101142ts" > rebuildlog.txt &' % phoneID)
+    os.system('adb -s %s logcat | grep -a "101142ts" > rebuildlog.txt &' % phoneID)
 
     #读取unpack.txt
     os.system('adb -s %s pull /data/local/tmp/unpack.txt ./unpack.txt' % phoneID)
@@ -101,23 +101,10 @@ def main():
         os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
 
         #看是否dump完
-        alldone = 1
-        if Mode == 0:
-            dexDIR = "./jr/dex/"
-        else:
-            dexDIR = "./101142ts/dex/"
-
-        os.system('rm -rf %s' % dexDIR)
-        os.system('mkdir %s' % dexDIR)
-        PhonedexDIR = dir + "/dex"
-        os.system('adb -s %s pull %s %s 2>null' % (phoneID, PhonedexDIR, dexDIR))
-        for num in os.listdir(dexDIR): 
-            nowDir = os.path.join(dexDIR, num) 
-
-            if not os.path.exists(nowDir + "/isdone"):
-                alldone = 0
-                break
-        if alldone == 1:
+        okfile = dir + "/OK.txt"
+        os.system('rm ./OK.txt')
+        os.system('adb -s %s pull %s ./OK.txt 2>null' % (phoneID, okfile))
+        if os.path.exists("./OK.txt"):
             break
         print()
     print("dump已完成，准备取出code文件夹")

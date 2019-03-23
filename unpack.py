@@ -54,7 +54,7 @@ def main():
 
     #删除adblogcat, 新开启logcat并把信息储存到本地
     os.system('rm adblogcat.txt 2>/dev/null')
-    os.system('adb -s %s logcat | grep "101142ts" > adblogcat.txt &' % phoneID)
+    os.system('adb -s %s logcat | grep -a "101142ts" > adblogcat.txt &' % phoneID)
     
     #读取unpack.txt
     os.system('rm ./unpack.txt 2>/dev/null')
@@ -122,8 +122,8 @@ def main():
         #判断
         #cnt = 0
         while 1:
-            #等待10s
-            time.sleep(10)
+            #等待1s
+            time.sleep(1)
             nowTID = getTID();
             print(nowTID)
             if nowTID != lastTID:
