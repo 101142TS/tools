@@ -121,8 +121,8 @@ def main():
 
     
     if Mode == 0:
-        nowdir = dir + "/code"
-        os.system('adb -s %s pull %s ./jr/code 2>null' % (phoneID, nowdir))
+        #nowdir = dir + "/code"
+        os.system('adb -s %s pull %s ./jr/ 2>null' % (phoneID, dir))
 
         
 if __name__=="__main__": main()

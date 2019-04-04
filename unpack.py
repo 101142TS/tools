@@ -31,9 +31,12 @@ def getTID():
 
     os.system('rm ./tid.txt 2>/dev/null')
     os.system('adb -s %s pull %s ./tid.txt 2>/dev/null' % (phoneID, tidpath))
-    fp = open('./tid.txt', 'r')
-    tid = fp.readline();
-    fp.close()
+    if os.path.exists("./tid.txt"):
+        fp = open('./tid.txt', 'r')
+        tid = fp.readline();
+        fp.close()
+    else:
+        tid = -1;
     return tid
 def main():
     global tidpath
@@ -71,6 +74,8 @@ def main():
 
     sum = 0
     os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
+
+    schhis = ""
     while 1:
         #输出次数
         sum = sum + 1
@@ -96,6 +101,12 @@ def main():
             os.system('mv now_sche.txt last_sche.txt')
         else:
             os.system('adb -s %s push ./last_sche.txt %s' % (phoneID, sche))
+        
+        #有可能过了一轮以后./last_sche.txt不变，这个时候可能是等待时间太短导致classloader为空，肯定能保证unpack.txt有3个值
+        fp = open('./last_sche.txt', 'r')
+        schnow = fp.read();
+        fp.close()
+
 
         os.system('adb -s %s shell cat %s' % (phoneID, sche))
         print()
@@ -122,8 +133,11 @@ def main():
         #判断
         #cnt = 0
         while 1:
-            #等待1s
-            time.sleep(1)
+            #如果卡住了，就等待10s,否则等待1s
+            if schhis == schnow:
+                time.sleep(10)
+            else:
+                time.sleep(1)
             nowTID = getTID();
             print(nowTID)
             if nowTID != lastTID:
@@ -131,33 +145,12 @@ def main():
                 continue;
             else:
                 break;
-            '''
-            #查看线程tid是否存活
-            os.system('rm ./tmp.txt 2>/dev/null')
-            os.system('adb shell ps -t | awk \'{print $2}\' > ./tmp.txt')
             
-            alive = 0;
-            fp = open('./tmp.txt', 'r')
-            x = fp.readline()  #读取第一行PID
-            x = fp.readline()
-            while x:
-                if x == nowTID:
-                    alive = 1;
-                    break;
-                x = fp.readline()
-            fp.close()
 
-            if alive == 0:
-                break;
-                time.sleep(0.2)
-                cnt = cnt + 1
-            
-            #容忍4s，不行就退出
-            if cnt == 20:
-                break;
-            '''
         print("准备停止")
         os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
+        time.sleep(3)
+        schhis = schnow
         
 
     print("dump已完成，准备取出101142ts文件夹")

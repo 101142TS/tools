@@ -5,9 +5,11 @@ import os
 import os,sys 
 import hashlib
 import shutil
+from collections import OrderedDict
 Mode = 0
 tot_method = 0
 abone = 0
+dic = {'NATIVE' : 0}
 def Test2(rootDir, targetDir): 
     global Mode;
     global tot_method;
@@ -31,15 +33,13 @@ def Test2(rootDir, targetDir):
                 tot_method = tot_method + 1
             
             NXTrootDir = os.path.join(rootDir, lists) 
-            #print(NXTrootDir)
             os.listdir(rootDir)
             NXTtargetDir = os.path.join(targetDir, lists)
-            #print(NXTtargetDir)
-            #print()
-
-            #print(NXTrootDir)
-            #print(NXTtargetDir)
-
+            
+            if not dic.__contains__(str(lists)):
+                dic[str(lists)] = 1;
+            else:
+                dic[str(lists)] = dic[str(lists)] + 1
             os.system(r'./trans '+ "\'" + NXTrootDir + "\' " + "\'" + NXTtargetDir + "\'")
         if len(os.listdir(rootDir)) > 1:
             print(rootDir)
@@ -48,7 +48,7 @@ def main():
     global Mode;
     global tot_method;
     global abone;
-
+    global dic;
     if len(sys.argv) != 2:
         print("argc error")
     else:
@@ -72,7 +72,10 @@ def main():
             print("总共有 %d 个方法" % tot_method)
         else:
             print("有 %d 个方法包含了两个以上不同的bytecode文件" % abone)
-
+    
+    ans = sorted(dic.items(), key=lambda x: x[1],  reverse = True)
+    for i in range(0, 10):
+        print(ans[i])
 if __name__=="__main__": main()
 
  
