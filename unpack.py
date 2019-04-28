@@ -133,9 +133,10 @@ def main():
         #判断
         #cnt = 0
         while 1:
-            #如果卡住了，就等待10s,否则等待1s
+            #如果卡住了，就等待60s,否则等待1s
             if schhis == schnow:
-                time.sleep(10)
+                time.sleep(60)
+                break
             else:
                 time.sleep(1)
             nowTID = getTID();
@@ -144,12 +145,12 @@ def main():
                 lastTID = nowTID
                 continue;
             else:
+                os.system('adb -s %s shell kill %s' % (phoneID, nowTID))
                 break;
-            
+        
 
         print("准备停止")
         os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
-        time.sleep(3)
         schhis = schnow
         
 
@@ -167,7 +168,7 @@ def main():
 
     #取出101142ts
     os.system('adb -s %s pull %s ./101142ts 2>/dev/null' % (phoneID, dir))
-
+    print("已成功取出")
     
 if __name__=="__main__": main()
 

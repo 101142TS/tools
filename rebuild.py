@@ -123,6 +123,7 @@ def main():
     if Mode == 0:
         #nowdir = dir + "/code"
         os.system('adb -s %s pull %s ./jr/ 2>null' % (phoneID, dir))
+        print("已成功取出")
 
         
 if __name__=="__main__": main()

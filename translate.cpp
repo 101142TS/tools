@@ -251,7 +251,7 @@ int OpcodeLength[256] = {
     2, //OP_SGET_WIDE_VOLATILE           = 0xea,
     2, //OP_SPUT_WIDE_VOLATILE           = 0xeb,
     1, //OP_BREAKPOINT                   = 0xec,
-    2, //OP_THROW_VERIFICATION_ERROR     = 0xed,
+    3, //OP_INVOKE_VIRTUAL               = 0xed,    本来是OP_THROW_VERIFICATION_ERROR
     3, //OP_EXECUTE_INLINE               = 0xee,
     3, //OP_EXECUTE_INLINE_RANGE         = 0xef,
     3, //OP_INVOKE_OBJECT_INIT_RANGE     = 0xf0,
@@ -390,11 +390,11 @@ string OpcodeName[256] = {
     "OP_INVOKE_STATIC               ", //0x71,
     "OP_INVOKE_INTERFACE            ", //0x72,
     "OP_UNUSED_73                   ", //0x73,
-    "OP_INVOKE_VIRTUAL_RANGE        ", //0x74,
-    "OP_INVOKE_SUPER_RANGE          ", //0x75,
-    "OP_INVOKE_DIRECT_RANGE         ", //0x76,
-    "OP_INVOKE_STATIC_RANGE         ", //0x77,
-    "OP_INVOKE_INTERFACE_RANGE      ", //0x78,
+    "OP_INVOKE_VIRTUAL              ", //0x74,  OP_INVOKE_VIRTUAL_RANGE
+    "OP_INVOKE_SUPER                ", //0x75,  OP_INVOKE_SUPER_RANGE
+    "OP_INVOKE_DIRECT               ", //0x76,  OP_INVOKE_DIRECT_RANGE
+    "OP_INVOKE_STATIC               ", //0x77,  OP_INVOKE_STATIC_RANGE
+    "OP_INVOKE_INTERFACE            ", //0x78,  OP_INVOKE_INTERFACE_RANGE
     "OP_UNUSED_79                   ", //0x79,
     "OP_UNUSED_7A                   ", //0x7a,
     "OP_NEG_INT                     ", //0x7b,
@@ -511,11 +511,11 @@ string OpcodeName[256] = {
     "OP_SGET_WIDE_VOLATILE          ", //0xea,
     "OP_SPUT_WIDE_VOLATILE          ", //0xeb,
     "OP_BREAKPOINT                  ", //0xec,
-    "OP_THROW_VERIFICATION_ERROR    ", //0xed,
+    "OP_INVOKE_VIRTUAL              ", //0xed,      本来是OP_THROW_VERIFICATION_ERROR
     "OP_EXECUTE_INLINE              ", //0xee,
     "OP_EXECUTE_INLINE_RANGE        ", //0xef,
     "OP_INVOKE_OBJECT_INIT_RANGE    ", //0xf0,
-    "OP_RETURN_VOID_BARRIER         ", //0xf1,
+    "OP_RETURN_VOID                 ", //0xf1,      本来是OP_RETURN_VOID_BARRIER
     "OP_IGET_QUICK                  ", //0xf2,
     "OP_IGET_WIDE_QUICK             ", //0xf3,
     "OP_IGET_OBJECT_QUICK           ", //0xf4,
@@ -569,7 +569,9 @@ int main(int argc, char** argv) {
     
     FILE *outfp = fopen(outfile.c_str(), "w");
     u2 *pc = code->insns;
+
     while ((u8)pc < (u8)&(code->insns[code->insnsSize])) {
+        
         u2 inst = FETCH(0);
         fprintf(outfp, "%s\n", OpcodeName[INST_INST(inst)].c_str());
         pc = pc + OpcodeLength[INST_INST(inst)];
