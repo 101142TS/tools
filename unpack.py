@@ -73,12 +73,22 @@ def main():
     tidpath = dir + "/tid.txt"
 
     sum = 0
+    if os.path.exists("./crashcnt.txt"):
+        fp = open("./crashcnt.txt", 'r')
+        sum = fp.readline();
+        sum = int(sum);
+        fp.close();
+
     os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
 
     schhis = ""
     while 1:
         #输出次数
         sum = sum + 1
+        fp = open("./crashcnt.txt", 'w')
+        fp.write(str(sum));
+        fp.close();
+
         print("第%d次dump " % sum)
         #输出时间
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
@@ -105,6 +115,7 @@ def main():
         #有可能过了一轮以后./last_sche.txt不变，这个时候可能是等待时间太短导致classloader为空，肯定能保证unpack.txt有3个值
         fp = open('./last_sche.txt', 'r')
         schnow = fp.read();
+        
         fp.close()
 
 
@@ -151,10 +162,12 @@ def main():
 
         print("准备停止")
         os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
+        if schhis == schnow:
+            sum = sum - 1;
         schhis = schnow
         
 
-    print("dump已完成，准备取出101142ts文件夹")
+    print("dump已完成，准备取出101142ts/record.txt")
     #将后台的记录日志关掉
     os.system('ps > tmp.txt')
     os.system('cat tmp.txt | grep "adb" | awk \'{print $1}\' > ./result.txt')
@@ -166,8 +179,10 @@ def main():
         x = fp.readline()
     fp.close()
 
-    #取出101142ts
-    os.system('adb -s %s pull %s ./101142ts 2>/dev/null' % (phoneID, dir))
+    #取出101142ts/record.txt
+    dir = dir + "/record.txt"
+    print(dir)
+    os.system('adb -s %s pull %s . 2>/dev/null' % (phoneID, dir))
     print("已成功取出")
     
 if __name__=="__main__": main()

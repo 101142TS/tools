@@ -40,7 +40,7 @@ def main():
     os.system('adb -s %s logcat | grep -a "101142ts" > rebuildlog.txt &' % phoneID)
 
     #读取unpack.txt
-    os.system('adb -s %s pull /data/local/tmp/unpack.txt ./unpack.txt' % phoneID)
+    os.system('adb -s %s pull /data/local/tmp/unpack.txt ./unpack.txt 2>/dev/null' % phoneID)
     fp = open('./unpack.txt', 'r')
     packagename = fp.readline(); packagename = packagename.strip()
     fp.readline();
@@ -54,6 +54,7 @@ def main():
         dir = "/data/data/" + packagename  + "/jr"
         print("jr")
     else:
+        os.system('rm -rf ./dex')
         dir = "/data/data/" + packagename  + "/101142ts"
         print("101142ts")
 
@@ -71,7 +72,7 @@ def main():
         time.sleep(WaitingTime)
 
         #读取tid
-        os.system('adb -s %s pull %s ./tid.txt' % (phoneID, tidpath))
+        os.system('adb -s %s pull %s ./tid.txt 2>/dev/null' % (phoneID, tidpath))
         fp = open('./tid.txt', 'r')
         tid = fp.readline();       tid = int(tid)
         print("线程号 %d " % tid)
@@ -101,10 +102,10 @@ def main():
         os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
 
         #看是否dump完
-        okfile = dir + "/OK.txt"
-        os.system('rm ./OK.txt')
-        os.system('adb -s %s pull %s ./OK.txt 2>null' % (phoneID, okfile))
-        if os.path.exists("./OK.txt"):
+        okfile = dir + "/rebuild_OK.txt"
+        os.system('rm ./rebuild_OK.txt')
+        os.system('adb -s %s pull %s ./rebuild_OK.txt 2>null' % (phoneID, okfile))
+        if os.path.exists("./rebuild_OK.txt"):
             break
         print()
     print("dump已完成，准备取出code文件夹")
@@ -123,6 +124,10 @@ def main():
     if Mode == 0:
         #nowdir = dir + "/code"
         os.system('adb -s %s pull %s ./jr/ 2>null' % (phoneID, dir))
+        print("已成功取出")
+    elif Mode == 1:
+        dir = dir + "/dex/"
+        os.system('adb -s %s pull %s ./dex/ 2>null' % (phoneID, dir))
         print("已成功取出")
 
         
