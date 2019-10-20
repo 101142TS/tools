@@ -20,6 +20,7 @@ def main():
         os.system('java -jar /usr/local/bin/baksmali-2.1.1.jar -x %s -d ~/Desktop/framework -o ./dex/result' % dexfile)
         print(dexfile)
 
+    os.system("./replace.py ./dex/result")
 if __name__=="__main__": main()
 
  
