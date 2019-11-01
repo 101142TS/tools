@@ -85,11 +85,7 @@ def main():
     while 1:
         #输出次数
         sum = sum + 1
-        fp = open("./crashcnt.txt", 'w')
-        fp.write(str(sum));
-        fp.close();
 
-        print("第%d次dump " % sum)
         #输出时间
         print(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()))
         #判断是否已经结束dump
@@ -118,52 +114,69 @@ def main():
         
         fp.close()
 
+        ##################
+        print(schnow)
+        if schhis == schnow:
+            sum = sum - 1;
+        
+        fp = open("./crashcnt.txt", 'w')
+        fp.write(str(sum));
+        fp.close();
 
-        os.system('adb -s %s shell cat %s' % (phoneID, sche))
-        print()
+        print("第%d次dump " % sum)
+        ##################
+
         #让应用运行并且等待
         os.system('adb -s %s shell monkey -p %s -c android.intent.category.LAUNCHER 1 > /dev/null' % (phoneID, packagename))
         print("应用已启动")
 
-        #等待一段时间
-        if sum == 1:
-            #如果是第一次运行的话，则要运行makeup步骤
-            while 1:
-                makeuppath = dir + "/makeup"
-                os.system('rm ./makeup 2>/dev/null')
-                os.system('adb -s %s pull %s ./makeup 2>/dev/null' % (phoneID, makeuppath))
-                if os.path.exists("./makeup"):
-                    break
-                time.sleep(5)
-        else:
-            time.sleep(WaitingTime)
+        #等待，直到应用stable, 只等待3s
+        stablepath = dir + "/stableFile.txt";
 
-        #这里的lastTID可能是空的
-        lastTID = getTID();
-
-        #判断
-        #cnt = 0
-        while 1:
-            #如果卡住了，就等待60s,否则等待1s
-            if schhis == schnow:
-                time.sleep(60)
+        waitstable = 0;
+        while waitstable <= 3:
+            os.system('rm ./stableFile.txt 2>/dev/null')
+            os.system('adb -s %s pull %s ./stableFile.txt 2>/dev/null' % (phoneID, stablepath))
+            if os.path.exists("./stableFile.txt"):
                 break
-            else:
-                time.sleep(1)
-            nowTID = getTID();
-            print(nowTID)
-            if nowTID != lastTID:
-                lastTID = nowTID
-                continue;
-            else:
-                os.system('adb -s %s shell kill %s' % (phoneID, nowTID))
-                break;
+            time.sleep(1)
+            waitstable = waitstable + 1
+
+        if waitstable == 4:
+            #stable了才有下面的操作
+            #等待一段时间
+            if sum == 1:
+                #如果是第一次运行的话，则要运行makeup步骤
+                while 1:
+                    makeuppath = dir + "/makeup"
+                    os.system('rm ./makeup 2>/dev/null')
+                    os.system('adb -s %s pull %s ./makeup 2>/dev/null' % (phoneID, makeuppath))
+                    if os.path.exists("./makeup"):
+                        break
+                    time.sleep(5)
+
+            #这里的lastTID可能是空的
+            lastTID = getTID();
+
+            #判断
+            #cnt = 0
+            while 1:
+                #每个方法的执行只给0.1s时间
+                time.sleep(0.1)
+                nowTID = getTID();
+                print(nowTID)
+                if nowTID != lastTID:
+                    lastTID = nowTID
+                    continue;
+                else:
+                    os.system('adb -s %s shell kill %s' % (phoneID, nowTID))
+                    break;
         
 
         print("准备停止")
         os.system('adb -s %s shell am force-stop %s' % (phoneID, packagename))
-        if schhis == schnow:
-            sum = sum - 1;
+        os.system('adb -s %s shell rm -rf %s' % (phoneID, stablepath))
+
         schhis = schnow
         
 
