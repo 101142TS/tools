@@ -57,34 +57,34 @@ def Replace(f1, f2):
                     if word.endswith('\n'):
                         word = word.strip('\n')
 
-                    if word != "native" or method_def == False:
-                        fp2.write(' ')
-                        if word.startswith(':cond_'):
-                            fp2.write(':cond_')
-                        elif word.startswith(':goto_'):
-                            fp2.write(':goto_')
-                        elif word.startswith(':pswitch_'):
-                            fp2.write(':pswitch_')
-                        elif word.startswith(':try_start_'):
-                            fp2.write(':try_start_')
-                        elif word.startswith('{:try_start_'):
-                            fp2.write('{:try_start_')
-                        elif word.startswith(':try_end_') and word.endswith('}'):
-                            fp2.write(':try_end_}')
-                        elif word.startswith(':try_end_'):
-                            fp2.write(':try_end_')
-                        elif word.startswith(':sswitch_data_'):
-                            fp2.write(':sswitch_data_')
-                        elif word.startswith(':sswitch_'):
-                            fp2.write(':sswitch_')
-                        elif word.startswith(':array_'):
-                            fp2.write(':array_')
-                        elif word.startswith(':catchall_'):
-                            fp2.write(':catchall_')
-                        elif word.startswith(':catch_'):
-                            fp2.write(':catch_')
-                        else:
-                            fp2.write(word)
+                    #if word != "native" or method_def == False:
+                    fp2.write(' ')
+                    if word.startswith(':cond_'):
+                        fp2.write(':cond_')
+                    elif word.startswith(':goto_'):
+                        fp2.write(':goto_')
+                    elif word.startswith(':pswitch_'):
+                        fp2.write(':pswitch_')
+                    elif word.startswith(':try_start_'):
+                        fp2.write(':try_start_')
+                    elif word.startswith('{:try_start_'):
+                        fp2.write('{:try_start_')
+                    elif word.startswith(':try_end_') and word.endswith('}'):
+                        fp2.write(':try_end_}')
+                    elif word.startswith(':try_end_'):
+                        fp2.write(':try_end_')
+                    elif word.startswith(':sswitch_data_'):
+                        fp2.write(':sswitch_data_')
+                    elif word.startswith(':sswitch_'):
+                        fp2.write(':sswitch_')
+                    elif word.startswith(':array_'):
+                        fp2.write(':array_')
+                    elif word.startswith(':catchall_'):
+                        fp2.write(':catchall_')
+                    elif word.startswith(':catch_'):
+                        fp2.write(':catch_')
+                    else:
+                        fp2.write(word)
                 fp2.write('\n')
             
             if len(words) > 1 and words[st] == '.end' and words[st + 1] == 'annotation\n':
