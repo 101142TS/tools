@@ -21,6 +21,7 @@ def main():
         print(dexfile)
 
     os.system("./replace.py ./dex/result")
+    os.system('./calc.py ./dex/result > ./结果.txt')
 if __name__=="__main__": main()
 
  

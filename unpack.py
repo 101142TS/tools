@@ -134,15 +134,17 @@ def main():
         stablepath = dir + "/stableFile.txt";
 
         waitstable = 0;
-        while waitstable <= 3:
+        OKtoDump = 0
+        while waitstable <= 5:
             os.system('rm ./stableFile.txt 2>/dev/null')
             os.system('adb -s %s pull %s ./stableFile.txt 2>/dev/null' % (phoneID, stablepath))
             if os.path.exists("./stableFile.txt"):
+                OKtoDump = 1
                 break
             time.sleep(1)
             waitstable = waitstable + 1
 
-        if waitstable == 4:
+        if OKtoDump == 1:
             #stable了才有下面的操作
             #等待一段时间
             if sum == 1:

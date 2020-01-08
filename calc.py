@@ -72,6 +72,13 @@ def getData(f1, clazzname):
 
     fp.close()
 
+
+    r = os.popen("pcregrep -M -r \"     nop\\n     nop\\n     nop\\n\" '%s'" % f1);
+    info = r.readlines() 
+    if (len(info) > 1):
+        print(f1)
+    r.close();
+
 def search(folder, clazzname):
 
     for name in os.listdir(folder): 
@@ -94,8 +101,8 @@ def main():
     global native_method_cnt;
     os.system("grep -r \"end method\" %s | wc -l" % sys.argv[1]);
     search(sys.argv[1], "L")
-    print("native 方法数目: %d" % native_method_cnt)
-    print("java   方法数目: %d" % (method_cnt - native_method_cnt))
+    print("native 方法数目: %d" % native_method_cnt)                    #没有函数体的native方法
+    print("java   方法数目: %d" % (method_cnt - native_method_cnt))     #没有函数体的java方法（非abstract）
 
     #print(empty_list)
 

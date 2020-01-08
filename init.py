@@ -35,6 +35,10 @@ def main():
     phoneID = trans_ID(int(sys.argv[1]))
     packagename = sys.argv[2]
 
+    #将mTargetPackage放入到/data/local/tmp/mTargetPackage.txt
+    os.system('echo %s > ./mTargetPackage.txt' % packagename)
+    os.system('adb -s %s push ./mTargetPackage.txt /data/local/tmp/mTargetPackage.txt' % phoneID)
+
     os.system('adb -s %s shell mkdir /data/data/%s/101142ts/' % (phoneID, packagename))
     #将last_sche.txt放进去
     os.system('adb -s %s push ./last_sche.txt /data/data/%s/101142ts/sche.txt' % (phoneID, packagename))
